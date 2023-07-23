@@ -29,6 +29,7 @@ async function run() {
 
         const collegeCollection = client.db('nationalColleges').collection('college')
         const admissionCollegeCollection = client.db('nationalColleges').collection('admissionColleges')
+        const formFillCollegeCollection = client.db('nationalColleges').collection('formFillColleges')
 
         app.get('/colleges', async(req, res)=> {
             const result = await collegeCollection.find().toArray()
@@ -49,6 +50,17 @@ async function run() {
             const id = req.params.id;
             const query = {_id: new ObjectId (id)}
             const result = await admissionCollegeCollection.findOne(query)
+            res.send(result)
+        })
+
+        // admission form ------
+        app.post('/admissionFormFill', async(req, res) =>{
+            const admissionForm = req.body
+            const result = await formFillCollegeCollection.insertOne(admissionForm)
+            res.send(result)
+        })
+        app.get('/admissionFormFill', async(req, res) =>{
+            const result = await formFillCollegeCollection.find().toArray()
             res.send(result)
         })
 
