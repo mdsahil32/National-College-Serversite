@@ -28,6 +28,7 @@ async function run() {
         await client.connect();
 
         const collegeCollection = client.db('nationalColleges').collection('college')
+        const admissionCollegeCollection = client.db('nationalColleges').collection('admissionColleges')
 
         app.get('/colleges', async(req, res)=> {
             const result = await collegeCollection.find().toArray()
@@ -37,6 +38,17 @@ async function run() {
             const id = req.params.id;
             const query = {_id: new ObjectId(id)}
             const result = await collegeCollection.findOne(query)
+            res.send(result)
+        })
+
+        app.get('/admissionColleges', async(req, res )=> {
+            const result = await admissionCollegeCollection.find().toArray()
+            res.send(result)
+        })
+        app.get('/admissionColleges/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId (id)}
+            const result = await admissionCollegeCollection.findOne(query)
             res.send(result)
         })
 
