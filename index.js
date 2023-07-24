@@ -27,42 +27,73 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
+        const homeCollegeCollection = client.db('nationalColleges').collection('homeCollege')
         const collegeCollection = client.db('nationalColleges').collection('college')
         const admissionCollegeCollection = client.db('nationalColleges').collection('admissionColleges')
         const formFillCollegeCollection = client.db('nationalColleges').collection('formFillColleges')
 
-        app.get('/colleges', async(req, res)=> {
+
+        app.get('/homeCollege', async (req, res) => {
+            const result = await homeCollegeCollection.find().toArray()
+            res.send(result)
+        })
+        app.get('/homeCollege/:id' , async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)}
+            const result = await homeCollegeCollection.findOne(query)
+            res.send(result)
+        })
+
+        app.get('/colleges', async (req, res) => {
             const result = await collegeCollection.find().toArray()
             res.send(result)
         })
-        app.get('/colleges/:id', async(req, res) => {
+        app.get('/colleges/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await collegeCollection.findOne(query)
             res.send(result)
         })
 
-        app.get('/admissionColleges', async(req, res )=> {
+        app.get('/admissionColleges', async (req, res) => {
             const result = await admissionCollegeCollection.find().toArray()
             res.send(result)
         })
-        app.get('/admissionColleges/:id', async(req, res) => {
+        app.get('/admissionColleges/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId (id)}
+            const query = { _id: new ObjectId(id) }
             const result = await admissionCollegeCollection.findOne(query)
             res.send(result)
         })
 
         // admission form ------
-        app.post('/admissionFormFill', async(req, res) =>{
+        app.post('/admissionFormFill', async (req, res) => {
             const admissionForm = req.body
             const result = await formFillCollegeCollection.insertOne(admissionForm)
             res.send(result)
         })
-        app.get('/admissionFormFill', async(req, res) =>{
+        app.get('/admissionFormFill', async (req, res) => {
             const result = await formFillCollegeCollection.find().toArray()
             res.send(result)
         })
+
+        // Search Option -- ----//
+        const indexKeys = { college_name: 1 };
+        const indexOptions = { college_name: "college_name" }
+
+        const result = await homeCollegeCollection.createIndex(indexKeys, indexOptions)
+
+        app.get('/homeCollege/:text', async (req, res) => {
+            const searchText = req.params.text;
+            const result = await homeCollegeCollection.find({
+                $or: [
+                    { college_name: { $regex: searchText, $options: "i" } }
+                ],
+            })
+                .toArray();
+            res.send(result)
+        })
+        // end-----
 
 
         // Send a ping to confirm a successful connection
